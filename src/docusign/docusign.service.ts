@@ -1,3 +1,4 @@
+import { AccountInfo } from './../interfaces/accout-info.interface';
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
@@ -85,7 +86,7 @@ export class DocusignService {
   }
 
   async sendDocument(body: SendDocumentDto): Promise<object> {
-    let accountInfo: any;
+    let accountInfo: AccountInfo;
     const fileId = body.fileId;
     const fileName = body.fileName;
 

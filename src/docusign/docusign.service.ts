@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
+import { SendDocumentDto } from 'src/dtos/send-document.dto';
+import { RecipientsInfo } from 'src/interfaces/recipient.interface';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -82,12 +84,11 @@ export class DocusignService {
     }
   }
 
-  async sendDocument() {
+  async sendDocument(body: SendDocumentDto): Promise<object> {
     let accountInfo: any;
-    const fileId = 10412;
-    const fileName = 'My CV';
-    const signerEmail = 'ayofalola240@gmail.com';
-    const signerName = 'Falola Ibrahim';
+    const fileId = body.fileId;
+    const fileName = body.fileName;
+
     try {
       accountInfo = await this.authenticate();
     } catch (error) {
@@ -111,22 +112,8 @@ export class DocusignService {
       pdfDoc.documentId = fileId;
       envDef.documents = [pdfDoc];
 
-      const signer = new docusign.Signer();
-      signer.email = signerEmail;
-      signer.name = signerName;
-      signer.recipientId = '1';
-      signer.routingOrder = '1';
-      signer.tabs = new docusign.Tabs();
-      signer.tabs.signHereTabs = [
-        {
-          documentId: fileId.toString(),
-          pageNumber: '1',
-          xPosition: '100',
-          yPosition: '100',
-        },
-      ];
       envDef.recipients = new docusign.Recipients();
-      envDef.recipients.signers = [signer];
+      envDef.recipients.signers = body.recipients;
       envDef.status = 'sent';
 
       const envelopesApi = new docusign.EnvelopesApi(this.client);
@@ -135,6 +122,8 @@ export class DocusignService {
       });
 
       return envelopeSummary;
+
+      return { status: 'sent' };
     } catch (error) {
       console.log(error);
       throw new BadRequestException('Something went wrong');

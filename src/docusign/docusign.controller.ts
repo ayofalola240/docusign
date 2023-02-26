@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
   Post,
@@ -11,10 +12,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { SendDocumentDto } from 'src/dtos/send-document.dto';
 import { imageFileFilter } from 'utils/file-helper';
 import { DocusignService } from './docusign.service';
-// import path, { extname } from 'path';
-// const demoDocsPath = path.resolve(__dirname, '../../uploads');
 
 @Controller('docusign')
 export class DocusignController {
@@ -49,16 +49,19 @@ export class DocusignController {
   async uploadFile(@UploadedFile() file, @Req() req: any) {
     try {
       if (!file || req.fileValidationError) {
-        throw new BadRequestException('Only PDF or DOCX files are allowed!');
+        throw new BadRequestException('Only PDF files are allowed!');
       }
-      return file;
+      return {
+        message: 'File successfully uploaded',
+        FileID: file.filename.split('.')[0],
+      };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
 
   @Post('/send')
-  async send() {
-    return await await this.docusignService.sendDocument();
+  async send(@Body() body: SendDocumentDto) {
+    return await this.docusignService.sendDocument(body);
   }
 }

@@ -3,7 +3,7 @@ import { AccountInfo } from './../interfaces/accout-info.interface';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import { SendDocumentDto } from 'src/dtos/send-document.dto';
-import { RecipientsInfo } from 'src/interfaces/recipient.interface';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -87,8 +87,7 @@ export class DocusignService {
 
   async sendDocument(body: SendDocumentDto): Promise<object> {
     let accountInfo: AccountInfo;
-    const fileId = body.fileId;
-    const fileName = body.fileName;
+    const { fileId, fileName, recipients } = body;
 
     try {
       accountInfo = await this.authenticate();
@@ -113,8 +112,24 @@ export class DocusignService {
       pdfDoc.documentId = fileId;
       envDef.documents = [pdfDoc];
 
+      const reminders = new docusign.Reminders();
+      reminders.reminderEnabled = true;
+      reminders.reminderDelay = 1; // number of days to wait before sending first reminders
+      reminders.reminderFrequency = 1; // number of days between reminders
+      reminders.reminderNote = 'Please sign the document as soon as possible.';
+
+      const notification = new docusign.Notification();
+      const expirations = new docusign.Expirations();
+      expirations.expireEnabled = 'true';
+      expirations.expireAfter = '30'; // envelope will expire after 30 days
+      expirations.expireWarn = '2'; // expiration reminder would be sent two days before expiration
+      notification.expirations = expirations;
+      notification.reminders = reminders;
+
+      envDef.notification = notification;
+
       envDef.recipients = new docusign.Recipients();
-      envDef.recipients.signers = body.recipients;
+      envDef.recipients.signers = recipients;
       envDef.status = 'sent';
 
       const envelopesApi = new docusign.EnvelopesApi(this.client);
@@ -123,8 +138,6 @@ export class DocusignService {
       });
 
       return envelopeSummary;
-
-      return { status: 'sent' };
     } catch (error) {
       console.log(error);
       throw new BadRequestException('Something went wrong');

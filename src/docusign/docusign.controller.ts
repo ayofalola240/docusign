@@ -60,8 +60,8 @@ export class DocusignController {
     }
   }
 
-  @Post('/send')
-  async send(@Body() body: SendDocumentDto) {
+  @Post('/send-document')
+  async sendDocument(@Body() body: SendDocumentDto) {
     return await this.docusignService.sendDocument(body);
   }
 }

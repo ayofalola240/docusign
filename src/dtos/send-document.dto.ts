@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 class signHereDto {
   @IsString()
@@ -36,6 +42,7 @@ class ResipientDto {
 
 export class SendDocumentDto {
   @IsString()
+  @IsOptional()
   readonly fileId: string;
 
   @IsString()

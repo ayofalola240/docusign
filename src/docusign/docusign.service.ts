@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import { AccountInfo } from './../interfaces/accout-info.interface';
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { BadRequestException, Injectable } from '@nestjs/common';
@@ -87,7 +88,10 @@ export class DocusignService {
 
   async sendDocument(body: SendDocumentDto): Promise<object> {
     let accountInfo: AccountInfo;
-    const { fileId, fileName, recipients } = body;
+    let { fileId, fileName, recipients } = body;
+    if (!fileId) {
+      fileId = '74581';
+    }
 
     try {
       accountInfo = await this.authenticate();
@@ -113,12 +117,14 @@ export class DocusignService {
       envDef.documents = [pdfDoc];
 
       const reminders = new docusign.Reminders();
-      reminders.reminderEnabled = true;
+      reminders.reminderEnabled = 'true';
       reminders.reminderDelay = 1; // number of days to wait before sending first reminders
       reminders.reminderFrequency = 1; // number of days between reminders
       reminders.reminderNote = 'Please sign the document as soon as possible.';
 
       const notification = new docusign.Notification();
+      notification.useAccountDefaults = 'false';
+
       const expirations = new docusign.Expirations();
       expirations.expireEnabled = 'true';
       expirations.expireAfter = '30'; // envelope will expire after 30 days
@@ -140,7 +146,7 @@ export class DocusignService {
       return envelopeSummary;
     } catch (error) {
       console.log(error);
-      throw new BadRequestException('Something went wrong');
+      throw new BadRequestException(error.message);
     }
   }
 }

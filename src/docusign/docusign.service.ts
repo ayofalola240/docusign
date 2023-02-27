@@ -10,7 +10,7 @@ const path = require('path');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const docusign = require('docusign-esign');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const jwtConfig = require('../../jwtConfig.json');
+import jwtConfig from '../../jwtConfig.json';
 @Injectable()
 export class DocusignService {
   private readonly client: any;

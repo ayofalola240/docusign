@@ -1,9 +1,10 @@
 /* eslint-disable prefer-const */
-import { AccountInfo } from './../interfaces/accout-info.interface';
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import { SendDocumentDto } from 'src/dtos/send-document.dto';
+import { AccountInfo } from 'src/interfaces/account-info.interface';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
